@@ -14,31 +14,42 @@ def downhtml(url):
     user_agent = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
     headers = { 'User-Agent' : user_agent, "Accept-Language": "zh-cn", 'Connection':'keep-alive','Accept-Encoding': 'gzip,deflate'}
     html = requests.get(url, headers = headers).content
-    return etree.HTML(html)
+    #return etree.HTML(html)
+    return html
 
 def Job_url(html):
     '''职位链接'''
+    html = etree.HTML(html)
     job_url = html.xpath("//td[@class = 'zwmc']/div/a/@href")
     return job_url
 
 def attribute(html):
     '''职位属性'''
-    #html = etree.HTML(html)
+    job_money = re.findall(r'<td class="zwyx">(.*)</td>', html)
+    job_city  = re.findall(r'<td class="gzdd">(.*?)</td>', html)
+    html = etree.HTML(html)
     job_attr = html.xpath("//div[@class='clearfix']/ul/li[1]/span/text()")
+
     f = open("attribute.txt", "a")
     for i in job_attr:
         f.write(i.encode('utf8') + '\n')
+    f.close()
+    f = open("city_money.txt", 'a')
+    for i in range(len(job_city)):
+        f.write(job_city[i] + '\t')
+        f.write(job_money[i] + '\n')
     f.close()
 
 def description(job_url):
     '''职位描述'''
     f = open('description.txt', 'a')
     for i in job_url:
-        sec = int(random.random()*10)
+        sec = int(random.random()*7)
         print 'Please wait', sec, 'sec'
         time.sleep(sec)
         try:
             html = downhtml(i)
+            html = etree.HTML(html)
             job_desc = html.xpath("//div[@class='tab-inner-cont']/p/text()")
             for j in job_desc:
                  j = re.sub('\s','',j)
@@ -56,3 +67,4 @@ if __name__ == '__main__':
         attribute(html)
         job_url = Job_url(html)
         description(job_url)
+        print '总进度:', (i+1)/90.0*100, '%'
