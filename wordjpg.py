@@ -11,6 +11,10 @@ f = open("index_des.txt", "r")
 book = f.read()
 f.close()
 def cut():
+    #自定义jieba字典
+    word = ['爬虫','较强','较好','后端','高新','大数据']
+    for seg in word:
+        jieba.add_word(seg, True)
     #print seg_list[0]
     findword = jieba.analyse.extract_tags(book, topK = 100, withWeight=True)
     list1 = []
